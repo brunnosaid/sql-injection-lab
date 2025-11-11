@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>SQLi Lab - Local</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>SQL Injection Lab</h1>
+    <p>Use este ambiente para testar injeções SQL localmente. Seja responsável.</p>
+
+    <section class="card">
+      <h2>Login (POST /login)</h2>
+      <form id="loginForm">
+        <label>Usuário<br><input name="username" value="alice" /></label><br>
+        <label>Senha<br><input name="password" value="alice123" /></label><br>
+        <button type="submit">Fazer login</button>
+      </form>
+      <pre id="loginResult"></pre>
+      <p class="hint">Teste payloads clássicos, por exemplo username: <code>' OR '1'='1</code></p>
+    </section>
+
+    <section class="card">
+      <h2>Busca (GET /search?q=...)</h2>
+      <input id="q" placeholder="buscar por nome ou usuário" />
+      <button id="btnSearch">Buscar</button>
+      <pre id="searchResult"></pre>
+      <p class="hint">Ex.: <code>alice</code> ou <code>' OR '1'='1</code></p>
+    </section>
+
+    <section class="card">
+      <h3>Observações</h3>
+      <ul>
+        <li>As rotas do servidor imprimem a query SQL no console para você inspecionar.</li>
+        <li>Veja o código do backend para comparar a versão vulnerável e a segura com prepared statements.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        username: form.username.value,
+        password: form.password.value
+      };
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      document.getElementById('loginResult').textContent = JSON.stringify(json, null, 2);
+    });
+
+    document.getElementById('btnSearch').addEventListener('click', async () => {
+      const q = document.getElementById('q').value;
+      const res = await fetch('/search?q=' + encodeURIComponent(q));
+      const json = await res.json();
+      document.getElementById('searchResult').textContent = JSON.stringify(json, null, 2);
+    });
+  </script>
+</body>
+</html>
